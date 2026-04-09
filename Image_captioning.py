@@ -8,16 +8,11 @@ from tensorflow.keras.layers import Input, Dense, LSTM, Embedding, Dropout
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 
-# -----------------------------
-# STEP 1: Load CNN Model
-# -----------------------------
 base_model = ResNet50(weights='imagenet')
 cnn_model = Model(inputs=base_model.input, outputs=base_model.layers[-2].output)
 
 
-# -----------------------------
-# STEP 2: Feature Extraction
-# -----------------------------
+
 def extract_features(img_path):
     img = image.load_img(img_path, target_size=(224, 224))
     img = image.img_to_array(img)
@@ -28,18 +23,14 @@ def extract_features(img_path):
     return feature[0]
 
 
-# -----------------------------
-# STEP 3: Dataset (Demo)
-# -----------------------------
+
 captions = {
-    "dog.jpg": "start a dog running in grass end",
-    "cat.jpg": "start a cat sitting on the floor end",
-    "bike.jpg": "start a man riding a bike end"
+    r"C:\Users\HP\Desktop\ImageCaptioning\dog.jpg": "start a dog running in grass end",
+    r"C:\Users\HP\Desktop\ImageCaptioning\cat.jpg": "start a cat sitting on the floor end",
+    r"C:\Users\HP\Desktop\ImageCaptioning\bike.jpg": "start a man riding a bike end"
 }
 
-# -----------------------------
-# STEP 4: Tokenization
-# -----------------------------
+
 all_captions = list(captions.values())
 
 tokenizer = Tokenizer()
@@ -50,9 +41,7 @@ vocab_size = len(tokenizer.word_index) + 1
 sequences = tokenizer.texts_to_sequences(all_captions)
 max_length = max(len(seq) for seq in sequences)
 
-# -----------------------------
-# STEP 5: Prepare Training Data
-# -----------------------------
+
 X1, X2, y = [], [], []
 
 for img_name, caption in captions.items():
@@ -72,9 +61,6 @@ X1 = np.array(X1)
 X2 = np.array(X2)
 y = np.array(y)
 
-# -----------------------------
-# STEP 6: Build Model
-# -----------------------------
 image_input = Input(shape=(2048,))
 img_dense = Dense(256, activation='relu')(image_input)
 img_dropout = Dropout(0.5)(img_dense)
@@ -93,16 +79,10 @@ model.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
 
 print(model.summary())
 
-# -----------------------------
-# STEP 7: Train Model
-# -----------------------------
 print("\nTraining model...")
 model.fit([X1, X2], y, epochs=200, verbose=1)
 
 
-# -----------------------------
-# STEP 8: Generate Caption
-# -----------------------------
 def generate_caption(photo):
     in_text = "start"
 
@@ -130,12 +110,8 @@ def generate_caption(photo):
     return in_text.replace("start", "").replace("end", "").strip()
 
 
-# -----------------------------
-# STEP 9: Test
-# -----------------------------
 print("\n=== Testing ===")
 
-# ⚠️ USE CORRECT PATH HERE
 img_path = r"C:\Users\HP\Desktop\ImageCaptioning\dog.jpg"
 
 photo = extract_features(img_path).reshape(1, 2048)
